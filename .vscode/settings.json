@@ -1,0 +1,13 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/common/.venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "micropico.autoConnect": false,
+  "micropico.manualComDevice": "/dev/ttyACM0",
+  "cursorpyright.analysis.extraPaths": ["lib", "common/typings"],
+  "cursorpyright.analysis.stubPath": "common/typings",
+  "cursorpyright.analysis.typeshedPaths": ["common/typings"],
+  "cursorpyright.analysis.typeCheckingMode": "basic",
+  "cursorpyright.analysis.diagnosticSeverityOverrides": {
+    "reportMissingModuleSource": "none"
+  }
+}

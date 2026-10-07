@@ -1,0 +1,4 @@
+common/.venv/
+common/typings/
+__pycache__/
+*.pyc

@@ -1,0 +1,11 @@
+{
+  "include": ["common/sample", "lib/onboard_led", "lib/ssd1306", "lib/wifi", "lib/access_point", "lib/webserver"],
+  "exclude": ["common/.venv", "common/typings", "common/scripts"],
+  "extraPaths": ["lib", "common/typings"],
+  "stubPath": "common/typings",
+  "typeshedPath": "common/typings",
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.10",
+  "pythonPlatform": "Linux",
+  "reportMissingModuleSource": "none"
+}
