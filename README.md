@@ -7,7 +7,7 @@ The Pico in this setup enumerates as USB `2e8a:0005` (“MicroPython Board in FS
 ## Layout
 
 ```text
-common/scripts/     reset, push, and REPL
+common/scripts/     reset, push, REPL, new modules, and versions
 common/sample/      example program
 common/.venv/       host Python tools (mpremote)
 common/typings/     MicroPython stubs for the editor
@@ -114,6 +114,43 @@ From the repo root:
 `push.sh` with no arguments runs `sample/blink.py`.
 
 Only that entry file is started. Other files are on the Pico so the entry file can import them. A package directory needs `__init__.py`.
+
+## Packages
+
+Each folder under `lib/` is a MicroPython package. Its `package.json` tells `mip` which files to copy onto a board. The `urls` list is pairs of `[path on the Pico, file next to package.json]`. `version` is `major.minor.patch`.
+
+This repo’s `push.sh` still copies `lib/` straight onto the attached Pico. Another project installs only what it needs, from GitHub, once this repository’s `main` branch is the project root:
+
+```bash
+common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/onboard_led@main
+common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/ssd1306@main
+common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/wifi@main
+common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/access_point@main
+common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/webserver@main
+```
+
+`@main` is the git ref `mpremote` 1.29 fetches. Without it, the request uses `HEAD`, which `raw.githubusercontent.com` does not serve. After you tag a release, `@v0.1.0` pins that tag. The install lands in the board’s `/lib`, which is already on the import path.
+
+`mip` does not copy the sources into the other project. Point that project’s `extraPaths` at a clone of this `lib/` directory so the editor can resolve the imports.
+
+Add a package:
+
+```bash
+./common/scripts/new-module.sh sensor
+```
+
+That creates `lib/sensor/__init__.py` and `lib/sensor/package.json` at version `0.1.0`. The name is a lowercase Python identifier. If you add more `.py` files later, add a `urls` entry for each one. The first element is the path under the board’s `/lib`.
+
+Set or bump the version:
+
+```bash
+./common/scripts/version.sh wifi 0.2.0
+./common/scripts/version.sh wifi patch
+./common/scripts/version.sh wifi minor
+./common/scripts/version.sh wifi major
+```
+
+`patch`, `minor`, and `major` require a `major.minor.patch` version. A bump changes `package.json` only. Tag the commit when you want installs to be able to request that version.
 
 ## Sample
 
