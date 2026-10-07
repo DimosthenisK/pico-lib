@@ -1,0 +1,15 @@
+{
+  "urls": [
+    [
+      "ble/__init__.py",
+      "__init__.py"
+    ]
+  ],
+  "deps": [
+    [
+      "aioble",
+      "latest"
+    ]
+  ],
+  "version": "0.1.0"
+}

@@ -16,6 +16,7 @@ lib/ssd1306/        SSD1306 package (wraps the micropython-lib driver)
 lib/wifi/           station Wi-Fi: connect and scan
 lib/access_point/   one access point: SSID and optional password
 lib/webserver/      HTTP server, port 80 unless you choose another
+lib/ble/            BLE connection that delivers incoming bytes as they arrive
 ```
 
 `push.sh` copies each folder under `lib/` onto the Pico under the same name, so `import onboard_led` works.
@@ -127,6 +128,7 @@ common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/ssd1306@m
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/wifi@main
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/access_point@main
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/webserver@main
+common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/ble@main
 ```
 
 `@main` is the git ref `mpremote` 1.29 fetches. Without it, the request uses `HEAD`, which `raw.githubusercontent.com` does not serve. After you tag a release, `@v0.1.0` pins that tag. The install lands in the board’s `/lib`, which is already on the import path.
@@ -178,4 +180,10 @@ You should see `blinking`. The LED turns on and off in half-second steps. `Onboa
 
 ```bash
 ./common/scripts/push.sh sample/setup.py
+```
+
+`common/sample/ble.py` advertises as `Pico`. Connect with a BLE serial app that speaks the Nordic UART Service and write to the RX characteristic. Each write is passed to `on_data` as `bytes` and shown on the display. `Bluetooth.open` runs until `close()`. The package is `ble` so it does not cover the firmware `bluetooth` module.
+
+```bash
+./common/scripts/push.sh sample/ble.py
 ```
