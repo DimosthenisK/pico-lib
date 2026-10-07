@@ -164,7 +164,7 @@ Set or bump the version:
 
 You should see `blinking`. The LED turns on and off in half-second steps. `OnboardLED.blink(duration)` is one on/off cycle, and each half lasts `duration` seconds. `on()` and `off()` set the LED directly.
 
-`common/sample/screen.py` constructs `SSD1306` with the SDA pin, SCL pin, and screen size. `text` clears the panel, draws the string, and shows it. The driver underneath is micropython-lib's `SSD1306_I2C`, on SoftI2C, because the hardware I2C peripheral returns `EIO` for this panel. This screen is SDA GP4, SCL GP5, 128x64, address `0x3C`.
+`common/sample/screen.py` constructs `SSD1306` with the SDA pin, SCL pin, and screen size. `text` clears the panel, draws the string, and shows it. `drawPixel`, `drawLine`, `drawRect`, `fillRect`, and `drawBitmap` add to what is already on the panel and show it. `drawBitmap` reads horizontal rows, with the high bit on the left. `clear` wipes the panel. The driver underneath is micropython-lib's `SSD1306_I2C`, on SoftI2C, because the hardware I2C peripheral returns `EIO` for this panel. This screen is SDA GP4, SCL GP5, 128x64, address `0x3C`.
 
 ```bash
 ./common/scripts/push.sh sample/screen.py
