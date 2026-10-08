@@ -71,10 +71,15 @@ ensure_access() {
 prepare_port() {
   if ! locate_port; then
     attach_pico || true
-    locate_port || {
+    local attempt
+    for attempt in 1 2 3 4 5 6 7 8 9 10; do
+      locate_port && break
+      sleep 0.2
+    done
+    if [[ -z "${PORT:-}" ]]; then
       echo "No MicroPython board (USB 2e8a:0005) is visible in this WSL distro." >&2
       exit 1
-    }
+    fi
   fi
   ensure_access
 }
