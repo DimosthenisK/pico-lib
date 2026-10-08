@@ -39,12 +39,15 @@ class Bluetooth:
         if self._rx is not None:
             return
         service = aioble.Service(_UART)
-        self._rx = aioble.Characteristic(
+        # The default characteristic is 20 bytes. A longer write is kept only
+        # up to that, which breaks a frame. 256 matches the MTU set by the app.
+        self._rx = aioble.BufferedCharacteristic(
             service,
             _UART_RX,
             write=True,
             write_no_response=True,
             capture=True,
+            max_len=256,
         )
         aioble.register_services(service)
 
