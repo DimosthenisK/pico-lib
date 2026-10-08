@@ -1,5 +1,5 @@
 {
-  "include": ["common/sample", "lib/onboard_led", "lib/ssd1306", "lib/wifi", "lib/access_point", "lib/webserver", "lib/ble"],
+  "include": ["common/sample", "lib/onboard_led", "lib/ssd1306", "lib/wifi", "lib/access_point", "lib/webserver", "lib/ble", "lib/ws2812b"],
   "exclude": ["common/.venv", "common/typings", "common/scripts"],
   "extraPaths": ["lib", "common/typings"],
   "stubPath": "common/typings",
