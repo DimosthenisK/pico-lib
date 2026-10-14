@@ -21,6 +21,7 @@ lib/ws2812b/        64-LED WS2812B string
 lib/servo/          MG90S hobby servo
 lib/neo6m/          u-blox NEO-6M GPS
 lib/mqtt/           MQTT client (wraps micropython-lib umqtt.simple)
+lib/config/         values stored on the Pico filesystem
 ```
 
 `push.sh` copies each folder under `lib/` onto the Pico under the same name, so `import onboard_led` works.
@@ -139,6 +140,7 @@ common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/ws2812b@m
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/servo@main
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/neo6m@main
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/mqtt@main
+common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/config@main
 ```
 
 `@main` is the git ref `mpremote` 1.29 fetches. Without it, the request uses `HEAD`, which `raw.githubusercontent.com` does not serve. After you tag a release, `@v0.1.0` pins that tag. The install lands in the board’s `/lib`, which is already on the import path.
@@ -217,6 +219,8 @@ You should see `blinking`. The LED turns on and off in half-second steps. `Onboa
 ```bash
 ./common/scripts/push.sh sample/mqtt.py
 ```
+
+`lib/config` stores values in `/config.json` on the Pico, so they are still there after a reset. Construct `Config` and use `get`, `set`, and `delete`. `get` returns the second argument when the key is missing, and that second argument is `None` when you leave it out. `set` writes the file immediately. `clear` removes the file. Keys are strings. Values are JSON: strings, numbers, booleans, lists, and dicts. A network saved from Bluetooth looks like `set("ssid", name)` and `set("password", password)`, then `get("ssid")` and `get("password")` on the next boot.
 
 `common/sample/ble.py` advertises as `Pico`. Connect with a BLE serial app that speaks the Nordic UART Service and write to the RX characteristic. Each write is passed to `on_data` as `bytes` and shown on the display. `Bluetooth.open` runs until `close()`. Pass `on_connect` to hear the session change: it is called with `True` when a central connects and `False` when that connection ends. The package is `ble` so it does not cover the firmware `bluetooth` module.
 

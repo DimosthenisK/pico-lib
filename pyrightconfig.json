@@ -1,5 +1,5 @@
 {
-  "include": ["common/sample", "lib/onboard_led", "lib/ssd1306", "lib/wifi", "lib/access_point", "lib/webserver", "lib/ble", "lib/ws2812b", "lib/servo", "lib/neo6m", "lib/mqtt"],
+  "include": ["common/sample", "lib/onboard_led", "lib/ssd1306", "lib/wifi", "lib/access_point", "lib/webserver", "lib/ble", "lib/ws2812b", "lib/servo", "lib/neo6m", "lib/mqtt", "lib/config"],
   "exclude": ["common/.venv", "common/typings", "common/scripts"],
   "extraPaths": ["lib", "common/typings", "common/lib-stubs"],
   "stubPath": "common/typings",
