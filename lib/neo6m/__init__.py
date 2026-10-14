@@ -24,10 +24,14 @@ class Fix:
 
 
 class NEO6M:
-    def __init__(self, tx, rx, baud=9600):
+    def __init__(self, tx, rx, baud=9600, on_event=None):
+        if on_event is not None and not callable(on_event):
+            raise TypeError("on_event must be callable")
         uart = _PINS.get((tx, rx))
         if uart is None:
             raise ValueError("pins are not a uart pair")
+        self._on_event = on_event
+        self._state = None
         self._uart = UART(
             uart,
             baudrate=baud,
@@ -44,6 +48,10 @@ class NEO6M:
         self._time = None
         self._date = None
         self._valid = False
+        self._emit("connecting")
+
+    def status(self):
+        return self._state
 
     def read(self):
         uart = self._uart
@@ -88,16 +96,16 @@ class NEO6M:
         self._time = _clock(fields[1])
         self._date = _day(fields[9])
         if fields[2] != "A":
-            self._valid = False
+            self._mark(False)
             return
         latitude = _degrees(fields[3], fields[4])
         longitude = _degrees(fields[5], fields[6])
         if latitude is None or longitude is None:
-            self._valid = False
+            self._mark(False)
             return
         self._latitude = latitude
         self._longitude = longitude
-        self._valid = True
+        self._mark(True)
 
     def _gga(self, fields):
         clock = _clock(fields[1])
@@ -106,16 +114,35 @@ class NEO6M:
         self._satellites = _count(fields[7])
         self._altitude = _meters(fields[9])
         if not fields[6] or fields[6] == "0":
-            self._valid = False
+            self._mark(False)
             return
         latitude = _degrees(fields[2], fields[3])
         longitude = _degrees(fields[4], fields[5])
         if latitude is None or longitude is None:
-            self._valid = False
+            self._mark(False)
             return
         self._latitude = latitude
         self._longitude = longitude
-        self._valid = True
+        self._mark(True)
+
+    def _mark(self, valid):
+        self._valid = valid
+        if valid:
+            self._emit("connected")
+            return
+        if self._state == "connected":
+            self._emit("disconnected")
+
+    def _emit(self, name):
+        if name == self._state:
+            return
+        self._state = name
+        if self._on_event is None:
+            return
+        try:
+            self._on_event(name)
+        except Exception as err:
+            print(err)
 
 
 def _degrees(raw, hemisphere):
