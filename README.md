@@ -18,6 +18,7 @@ lib/access_point/   one access point: SSID and optional password
 lib/webserver/      HTTP server, port 80 unless you choose another
 lib/ble/            BLE connection that delivers incoming bytes as they arrive
 lib/ws2812b/        64-LED WS2812B string
+lib/servo/          MG90S hobby servo
 ```
 
 `push.sh` copies each folder under `lib/` onto the Pico under the same name, so `import onboard_led` works.
@@ -131,6 +132,7 @@ common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/access_po
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/webserver@main
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/ble@main
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/ws2812b@main
+common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/servo@main
 ```
 
 `@main` is the git ref `mpremote` 1.29 fetches. Without it, the request uses `HEAD`, which `raw.githubusercontent.com` does not serve. After you tag a release, `@v0.1.0` pins that tag. The install lands in the board’s `/lib`, which is already on the import path.
@@ -185,6 +187,8 @@ You should see `blinking`. The LED turns on and off in half-second steps. `Onboa
 ```
 
 `lib/ws2812b` drives a 64-LED WS2812B string. Construct `WS2812B` with the data pin. `set(index, red, green, blue)` writes one LED in the buffer, index 0 through 63, colors 0 through 255. `fill` and `clear` change the whole buffer. `show` sends it. The wire order is green, red, blue, at 800 kHz.
+
+`lib/servo` drives an MG90S hobby servo. Construct `Servo` with the signal pin. `angle(degrees)` sets the horn from 0 through 180, and the constructor starts it at 90. A 500 µs pulse is 0° and a 2400 µs pulse is 180°, repeated at 50 Hz. `off` stops the pulses. Power the servo from 5 V and share ground with the Pico. The signal pin is a 3.3 V GPIO.
 
 `common/sample/ble.py` advertises as `Pico`. Connect with a BLE serial app that speaks the Nordic UART Service and write to the RX characteristic. Each write is passed to `on_data` as `bytes` and shown on the display. `Bluetooth.open` runs until `close()`. Pass `on_connect` to hear the session change: it is called with `True` when a central connects and `False` when that connection ends. The package is `ble` so it does not cover the firmware `bluetooth` module.
 
