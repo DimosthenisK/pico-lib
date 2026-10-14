@@ -22,12 +22,16 @@ class Bluetooth:
             return
         self._rx = None
         self._on_data = None
+        self._on_connect = None
         self._stop = False
 
-    def open(self, on_data, name="Pico"):
+    def open(self, on_data, name="Pico", on_connect=None):
         if not callable(on_data):
             raise TypeError("on_data must be callable")
+        if on_connect is not None and not callable(on_connect):
+            raise TypeError("on_connect must be callable")
         self._on_data = on_data
+        self._on_connect = on_connect
         self._stop = False
         self._ensure()
         asyncio.run(self._session(name))
@@ -62,17 +66,29 @@ class Bluetooth:
                 )
             except asyncio.TimeoutError:
                 continue
-            while not self._stop and connection.is_connected():
-                try:
-                    result = await self._rx.written(timeout_ms=1000)
-                except asyncio.TimeoutError:
-                    continue
-                except aioble.DeviceDisconnectedError:
-                    break
-                data = result[1] if isinstance(result, tuple) else result
-                if data is None:
-                    data = b""
-                try:
-                    self._on_data(bytes(data))
-                except Exception as err:
-                    print(err)
+            self._notify(True)
+            try:
+                while not self._stop and connection.is_connected():
+                    try:
+                        result = await self._rx.written(timeout_ms=1000)
+                    except asyncio.TimeoutError:
+                        continue
+                    except aioble.DeviceDisconnectedError:
+                        break
+                    data = result[1] if isinstance(result, tuple) else result
+                    if data is None:
+                        data = b""
+                    try:
+                        self._on_data(bytes(data))
+                    except Exception as err:
+                        print(err)
+            finally:
+                self._notify(False)
+
+    def _notify(self, connected):
+        if self._on_connect is None:
+            return
+        try:
+            self._on_connect(connected)
+        except Exception as err:
+            print(err)

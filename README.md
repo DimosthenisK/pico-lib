@@ -186,8 +186,14 @@ You should see `blinking`. The LED turns on and off in half-second steps. `Onboa
 
 `lib/ws2812b` drives a 64-LED WS2812B string. Construct `WS2812B` with the data pin. `set(index, red, green, blue)` writes one LED in the buffer, index 0 through 63, colors 0 through 255. `fill` and `clear` change the whole buffer. `show` sends it. The wire order is green, red, blue, at 800 kHz.
 
-`common/sample/ble.py` advertises as `Pico`. Connect with a BLE serial app that speaks the Nordic UART Service and write to the RX characteristic. Each write is passed to `on_data` as `bytes` and shown on the display. `Bluetooth.open` runs until `close()`. The package is `ble` so it does not cover the firmware `bluetooth` module.
+`common/sample/ble.py` advertises as `Pico`. Connect with a BLE serial app that speaks the Nordic UART Service and write to the RX characteristic. Each write is passed to `on_data` as `bytes` and shown on the display. `Bluetooth.open` runs until `close()`. Pass `on_connect` to hear the session change: it is called with `True` when a central connects and `False` when that connection ends. The package is `ble` so it does not cover the firmware `bluetooth` module.
 
 ```bash
 ./common/scripts/push.sh sample/ble.py
+```
+
+`common/sample/ble_wifi.py` advertises as `Pico WiFi`. Write the network name, a newline, and the password to the Nordic UART RX characteristic. The two parts can arrive in one write or as two writes. An empty password joins an open network. The display shows the Bluetooth session, then `connecting`, then `WiFi.status()` or the error from `WiFi.connect`.
+
+```bash
+./common/scripts/push.sh sample/ble_wifi.py
 ```
