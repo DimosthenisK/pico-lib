@@ -20,6 +20,7 @@ lib/ble/            BLE connection that delivers incoming bytes as they arrive
 lib/ws2812b/        64-LED WS2812B string
 lib/servo/          MG90S hobby servo
 lib/neo6m/          u-blox NEO-6M GPS
+lib/mqtt/           MQTT client (wraps micropython-lib umqtt.simple)
 ```
 
 `push.sh` copies each folder under `lib/` onto the Pico under the same name, so `import onboard_led` works.
@@ -61,6 +62,8 @@ rm -f common/typings/pyproject.toml
 `requirements-stubs.txt` pins `micropython-rp2-stubs==1.29.0.post1`. That package also installs `micropython-stdlib-stubs` 1.29, and its merged `machine` stubs come from the Pico W rp2 build, which includes `Pin("LED")` and `Pin.board.LED`. Remove `common/typings/pyproject.toml` after install so that file is not treated as a second project.
 
 Reload the Cursor window after the first install. `common/sample/blink.py` should then resolve `machine`, `Pin`, and `onboard_led`.
+
+`common/lib-stubs` holds editor stubs for micropython-lib packages that those firmware stubs do not include. `umqtt.simple` is there, so `lib/mqtt` can import it.
 
 ## 4. Attach the Pico to WSL
 
@@ -135,6 +138,7 @@ common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/ble@main
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/ws2812b@main
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/servo@main
 common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/neo6m@main
+common/.venv/bin/mpremote mip install github:DimosthenisK/pico-lib/lib/mqtt@main
 ```
 
 `@main` is the git ref `mpremote` 1.29 fetches. Without it, the request uses `HEAD`, which `raw.githubusercontent.com` does not serve. After you tag a release, `@v0.1.0` pins that tag. The install lands in the board’s `/lib`, which is already on the import path.
@@ -193,6 +197,8 @@ You should see `blinking`. The LED turns on and off in half-second steps. `Onboa
 `lib/servo` drives an MG90S hobby servo. Construct `Servo` with the signal pin. `angle(degrees)` sets the horn from 0 through 180, and the constructor starts it at 90. A 500 µs pulse is 0° and a 2400 µs pulse is 180°, repeated at 50 Hz. `off` stops the pulses. Power the servo from 5 V and share ground with the Pico. The signal pin is a 3.3 V GPIO.
 
 `lib/neo6m` reads a u-blox NEO-6M. Construct `NEO6M` with the Pico TX pin and RX pin. The module's RX wire goes to the TX pin, and its TX wire goes to the RX pin. Valid pairs are GP0/GP1, GP12/GP13, GP16/GP17, GP4/GP5, and GP8/GP9. The link is 9600 baud. Share ground, and power the board from its VCC pin. `read` drains the sentences waiting on the UART and returns a fix, or `None` while the module has no position. Pass `on_event` to hear the session change: `connecting` at startup, `connected` when a position arrives, and `disconnected` when that position is lost. `status` returns the current event. A fix has `latitude` and `longitude` in decimal degrees, `altitude` in meters, `satellites`, `time` as `hh:mm:ss`, and `date` as `dd/mm/yyyy`.
+
+`lib/mqtt` is an MQTT client. It wraps micropython-lib `umqtt.simple`, which `mip` installs with this package. The Pico needs a network before `connect`. Construct `MQTT` with a client id and the broker address, and optionally a user, password, and port. The port is 1883. `publish(topic, message)` sends a message. `retain=True` asks the broker to keep it. `subscribe(topic, on_message)` registers one callback, which is called with the topic and the message as strings. `check` looks for a message already waiting and returns immediately. Call it while the program is running so subscriptions are delivered. `disconnect` closes the connection.
 
 `common/sample/ble.py` advertises as `Pico`. Connect with a BLE serial app that speaks the Nordic UART Service and write to the RX characteristic. Each write is passed to `on_data` as `bytes` and shown on the display. `Bluetooth.open` runs until `close()`. Pass `on_connect` to hear the session change: it is called with `True` when a central connects and `False` when that connection ends. The package is `ble` so it does not cover the firmware `bluetooth` module.
 

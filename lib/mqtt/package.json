@@ -1,0 +1,15 @@
+{
+  "urls": [
+    [
+      "mqtt/__init__.py",
+      "__init__.py"
+    ]
+  ],
+  "deps": [
+    [
+      "umqtt.simple",
+      "latest"
+    ]
+  ],
+  "version": "0.1.0"
+}
